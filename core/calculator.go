@@ -16,30 +16,36 @@ func Calculate(args []string) {
 			os.Exit(1)
 		}
 
-		switch token.Type {
-		case NUMBER:
-			push(token)
-		case PLUS:
-			op1 := pop()
-			op2 := pop()
-			push(Token{Type: NUMBER, Literal: op1 + op2})
-		case MINUS:
-			op1 := pop()
-			op2 := pop()
-			push(Token{Type: NUMBER, Literal: op1 - op2})
-		case MULTIPLY:
-			op1 := pop()
-			op2 := pop()
-			push(Token{Type: NUMBER, Literal: op1 * op2})
-		case DIVIDE:
-			op1 := pop()
-			op2 := pop()
-			push(Token{Type: NUMBER, Literal: op1 / op2})
-		}
+		handleCommand(token)
 	}
 
 	result := stack[0]
 	fmt.Println(result.Literal)
+}
+
+func handleCommand(token Token) {
+	switch token.Type {
+	case NUMBER, PI, E:
+		push(token)
+	case PLUS:
+		op1 := pop()
+		op2 := pop()
+		push(Token{Type: NUMBER, Literal: op1 + op2})
+	case MINUS:
+		op1 := pop()
+		op2 := pop()
+		push(Token{Type: NUMBER, Literal: op1 - op2})
+	case MULTIPLY:
+		op1 := pop()
+		op2 := pop()
+		push(Token{Type: NUMBER, Literal: op1 * op2})
+	case DIVIDE:
+		op1 := pop()
+		op2 := pop()
+		push(Token{Type: NUMBER, Literal: op1 / op2})
+	case CLRSTACK:
+		stack = make([]Token, 0)
+	}
 }
 
 func push(element Token) {

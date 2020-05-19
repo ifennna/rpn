@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 )
 
@@ -17,6 +18,93 @@ const (
 	MINUS    = "minus"
 	MULTIPLY = "multiply"
 	DIVIDE   = "divide"
+	NOT      = "not"
+	NOTEQ    = "not equal to"
+	MOD      = "modulus"
+	DECR     = "decrement"
+	INCR     = "increment"
+
+	TRUE  = "true"
+	FALSE = "false"
+
+	E    = "e"
+	PI   = "pi"
+	RAND = "rand"
+
+	CLRSTACK = "clear stack"
+	CLRVARS  = "clear values"
+	CLRALL   = "clear stack and values"
+
+	BITAND   = "bit and"
+	BITOR    = "bit or"
+	BITXOR   = "bit xor"
+	BITNOT   = "bit not"
+	BITLEFT  = "bit shift left"
+	BITRIGHT = "bit shift right"
+
+	BOOLAND = "bool and"
+	BOOLOR  = "bool or"
+	BOOLXOR = "bool xor"
+
+	LT     = "less than"
+	LTOREQ = "less than or equal to"
+	EQ     = "equal to"
+	GT     = "greater than"
+	GTOREQ = "greater than or equal to"
+
+	ACOS = "acos"
+	ASIN = "asin"
+	ATAN = "atan"
+	COS  = "cos"
+	COSH = "cosh"
+	SIN  = "sin"
+	SINH = "sinh"
+	TANH = "tanh"
+
+	CEIL  = "ceiling"
+	FLOOR = "floor"
+	ROUND = "round"
+	IP    = "integer part"
+	FP    = "floating part"
+	SIGN  = "push -1, 0 or 0 depending on the sign"
+	ABS   = "absolute value"
+	MAX   = "min"
+	MIN   = "max"
+
+	HEX = "hex mode"
+	DEC = "dec mode"
+	BIN = "bin mode"
+	OCT = "oct mode"
+
+	EXP  = "exponential"
+	FACT = "factorial"
+	SQRT = "square root"
+	LN   = "natural log"
+	LOG  = "logarithm"
+	POW  = "raise a number to a power"
+
+	HNL = "host to network long"
+	HNS = "host to network short"
+	NHL = "network to host long"
+	NHS = "network to host short"
+
+	PICK   = "pick nth item from the stack"
+	REPEAT = "repeat an operation n times"
+	DEPTH  = "push current stack depth"
+	DROP   = "drop top item from the stack"
+	DROPN  = "drop n items from the stack"
+	DUP    = "duplicate top stack item"
+	DUPN   = "duplicate top n stack items in order"
+	ROLL   = "roll stack upwords by n"
+	ROLLD  = "roll stack downwards by n"
+	STACK  = "toggle stack display from horizontal to vertical"
+	SWAP   = "swap top 2 stack items"
+
+	MACRO  = "macro"
+	ASSIGN = "assign"
+
+	HELP = "help"
+	EXIT = "exit"
 )
 
 // ParseToken -> Parse a string into a calculator token
@@ -29,15 +117,155 @@ func ParseToken(item string) (Token, error) {
 	var token Token
 	switch item {
 	case "+":
-		token = Token{Type: PLUS, Literal: 0}
+		token = makeToken(PLUS)
 	case "-":
-		token = Token{Type: MINUS, Literal: 0}
+		token = makeToken(MINUS)
 	case "*":
-		token = Token{Type: MULTIPLY, Literal: 0}
+		token = makeToken(MINUS)
 	case "/":
-		token = Token{Type: DIVIDE, Literal: 0}
+		token = makeToken(DIVIDE)
+	case "!":
+		token = makeToken(NOT)
+	case "!=":
+		token = makeToken(NOTEQ)
+	case "%":
+		token = makeToken(MOD)
+	case "--":
+		token = makeToken(DECR)
+	case "++":
+		token = makeToken(INCR)
+	case "e":
+		token = Token{Type: E, Literal: math.E}
+	case "pi":
+		token = Token{Type: PI, Literal: math.Pi}
+	case "rand":
+		token = makeToken(RAND)
+	case "clr":
+		token = makeToken(CLRSTACK)
+	case "clv":
+		token = makeToken(CLRVARS)
+	case "cla":
+		token = makeToken(CLRALL)
+	case "&":
+		token = makeToken(BITAND)
+	case "|":
+		token = makeToken(BITOR)
+	case "^":
+		token = makeToken(BITXOR)
+	case "~":
+		token = makeToken(BITNOT)
+	case "<<":
+		token = makeToken(BITLEFT)
+	case ">>":
+		token = makeToken(BITRIGHT)
+	case "&&":
+		token = makeToken(BOOLAND)
+	case "||":
+		token = makeToken(BOOLOR)
+	case "^^":
+		token = makeToken(BOOLXOR)
+	case "<":
+		token = makeToken(LT)
+	case "<=":
+		token = makeToken(LTOREQ)
+	case "==":
+		token = makeToken(EQ)
+	case ">":
+		token = makeToken(GT)
+	case ">=":
+		token = makeToken(GTOREQ)
+	case "acos":
+		token = makeToken(ACOS)
+	case "asin":
+		token = makeToken(ASIN)
+	case "atan":
+		token = makeToken(ATAN)
+	case "cos":
+		token = makeToken(COS)
+	case "cosh":
+		token = makeToken(COSH)
+	case "sin":
+		token = makeToken(SIN)
+	case "sinh":
+		token = makeToken(SINH)
+	case "tanh":
+		token = makeToken(TANH)
+	case "ceil":
+		token = makeToken(CEIL)
+	case "floor":
+		token = makeToken(FLOOR)
+	case "round":
+		token = makeToken(ROUND)
+	case "ip":
+		token = makeToken(IP)
+	case "fp":
+		token = makeToken(FP)
+	case "sign":
+		token = makeToken(SIGN)
+	case "abs":
+		token = makeToken(ABS)
+	case "max":
+		token = makeToken(MAX)
+	case "min":
+		token = makeToken(MIN)
+	case "exp":
+		token = makeToken(EXP)
+	case "fact":
+		token = makeToken(FACT)
+	case "sqrt":
+		token = makeToken(SQRT)
+	case "ln":
+		token = makeToken(LN)
+	case "log":
+		token = makeToken(LOG)
+	case "pow":
+		token = makeToken(POW)
+	case "hnl":
+		token = makeToken(HNL)
+	case "hns":
+		token = makeToken(HNS)
+	case "nhl":
+		token = makeToken(NHL)
+	case "nhs":
+		token = makeToken(NHS)
+	case "pick":
+		token = makeToken(PICK)
+	case "repeat":
+		token = makeToken(REPEAT)
+	case "depth":
+		token = makeToken(DEPTH)
+	case "drop":
+		token = makeToken(DROP)
+	case "dropn":
+		token = makeToken(DROPN)
+	case "dup":
+		token = makeToken(DUP)
+	case "dupn":
+		token = makeToken(DUPN)
+	case "roll":
+		token = makeToken(ROLL)
+	case "rolld":
+		token = makeToken(ROLLD)
+	case "stack":
+		token = makeToken(STACK)
+	case "swap":
+		token = makeToken(SWAP)
+	case "hex":
+		token = makeToken(HEX)
+	case "dec":
+		token = makeToken(DEC)
+	case "oct":
+		token = makeToken(OCT)
+	case "bin":
+		token = makeToken(BIN)
+	case "exit":
+		token = makeToken(EXIT)
 	default:
 		return Token{}, fmt.Errorf("Unknown command: %v", item)
 	}
 	return token, nil
+}
+
+func makeToken(tokenType string) Token {
+	return Token{Type: tokenType, Literal: 0}
 }
