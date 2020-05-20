@@ -8,7 +8,7 @@ import (
 
 type Token struct {
 	Type    string
-	Literal float64
+	Literal interface{}
 }
 
 const (
@@ -24,8 +24,7 @@ const (
 	DECR     = "decrement"
 	INCR     = "increment"
 
-	TRUE  = "true"
-	FALSE = "false"
+	BOOLEAN = "boolean"
 
 	E    = "e"
 	PI   = "pi"
@@ -267,5 +266,5 @@ func ParseToken(item string) (Token, error) {
 }
 
 func makeToken(tokenType string) Token {
-	return Token{Type: tokenType, Literal: 0}
+	return Token{Type: tokenType, Literal: nil}
 }
