@@ -14,10 +14,10 @@ var root = &cobra.Command{
 	Long:  "rpn is a cli tool that brings the power and flexibility of Reverse Polish Notation to your terminal.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			// start repl
+			core.Repl()
+		} else {
+			core.Calculate(args)
 		}
-
-		core.Calculate(args)
 	},
 }
 

@@ -26,8 +26,6 @@ const (
 
 	BOOLEAN = "boolean"
 
-	E    = "e"
-	PI   = "pi"
 	RAND = "rand"
 
 	CLRSTACK = "clear stack"
@@ -120,7 +118,7 @@ func ParseToken(item string) (Token, error) {
 	case "-":
 		token = makeToken(MINUS)
 	case "*":
-		token = makeToken(MINUS)
+		token = makeToken(MULTIPLY)
 	case "/":
 		token = makeToken(DIVIDE)
 	case "!":
@@ -134,9 +132,9 @@ func ParseToken(item string) (Token, error) {
 	case "++":
 		token = makeToken(INCR)
 	case "e":
-		token = Token{Type: E, Literal: math.E}
+		token = Token{Type: NUMBER, Literal: math.E}
 	case "pi":
-		token = Token{Type: PI, Literal: math.Pi}
+		token = Token{Type: NUMBER, Literal: math.Pi}
 	case "rand":
 		token = makeToken(RAND)
 	case "clr":
