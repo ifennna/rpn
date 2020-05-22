@@ -1,7 +1,6 @@
 package core
 
 import (
-	"bufio"
 	"fmt"
 	"math"
 	"math/rand"
@@ -14,38 +13,6 @@ var stack []Token
 var values = make(map[string]Token)
 var macros = make(map[string][]string)
 
-var mode = DEC
-var display = "horizontal"
-
-// Calculate -> run a calculation for a sequence of commands
-func Calculate(args []string) {
-	for _, item := range args {
-		token, err := ParseToken(item)
-		if err != nil {
-			fmt.Printf("rpn: %v\n", err)
-			os.Exit(1)
-		}
-
-		handleCommand(token)
-	}
-
-	result := stack[0]
-	fmt.Println(result.Literal)
-}
-
-// Repl -> create a read-eval-print loop
-func Repl() {
-	scanner := bufio.NewScanner(os.Stdin)
-	for {
-		printPrompt()
-		if scanned := scanner.Scan(); !scanned {
-			return
-		}
-		text := strings.Split(scanner.Text(), " ")
-		eval(text)
-	}
-}
-
 func eval(commands []string) {
 	for i, item := range commands {
 		if item == "" {
@@ -57,7 +24,7 @@ func eval(commands []string) {
 			os.Exit(1)
 		}
 
-		if token.Type == MACRO || token.Type == MACRODEF || token.Type == REPEAT {
+		if token.Type == MACRODEF || token.Type == REPEAT {
 			switch token.Type {
 			case REPEAT:
 				n := popNumber(token.Type)
@@ -74,31 +41,15 @@ func eval(commands []string) {
 				}
 				eval(newCommands)
 			case MACRODEF:
-				macros[commands[i]] = commands[i+1:]
-			case MACRO:
-				eval(macros[token.Literal.(string)])
+				if len(commands[i:]) < 3 {
+					throwNotEnoughArgumentsError(MACRODEF)
+				}
+				macros[commands[i+1]] = commands[i+2:]
 			}
 			break
 		} else {
 			handleCommand(token)
 		}
-	}
-}
-
-func printPrompt() {
-	var valueStack []interface{}
-	for _, item := range stack {
-		valueStack = append(valueStack, item.Literal)
-	}
-	if display == "horizontal" {
-		fmt.Printf("%v > ", valueStack)
-	} else {
-		fmt.Println("STACK TOP")
-		for i := len(valueStack) - 1; i >= 0; i-- {
-			fmt.Printf("%v\n", valueStack[i])
-		}
-		fmt.Println("STACK BOTTOM")
-		fmt.Print("> ")
 	}
 }
 
@@ -371,6 +322,7 @@ func handleCommand(token Token) {
 		push(op1)
 		push(op2)
 	case MACRO:
+		eval(macros[token.Literal.(string)])
 	case ASSIGN:
 		if len(stack) < 1 {
 			throwNotEnoughElementsError(ASSIGN)
@@ -434,19 +386,4 @@ func factorial(n float64) float64 {
 
 func remove(slice []Token, s int) []Token {
 	return append(slice[:s], slice[s+1:]...)
-}
-
-func throwNotEnoughElementsError(action string) {
-	fmt.Printf("rpn: Not enough items on the stack to perform this command: %v\n", action)
-	os.Exit(1)
-}
-
-func throwNotEnoughArgumentsError(action string) {
-	fmt.Printf("rpn: Not enough arguments to perform this command: %v\n", action)
-	os.Exit(1)
-}
-
-func throwWrongElementType(expected, actual string) {
-	fmt.Printf("rpn: Expected a %v on the stack but found a %v\n", expected, actual)
-	os.Exit(1)
 }
