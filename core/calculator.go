@@ -11,8 +11,8 @@ import (
 )
 
 var stack []Token
-var values map[string]Token
-var macros map[string][]Token
+var values = make(map[string]Token)
+var macros = make(map[string][]string)
 
 var mode = DEC
 var display = "horizontal"
@@ -42,16 +42,44 @@ func Repl() {
 			return
 		}
 		text := strings.Split(scanner.Text(), " ")
-		for _, item := range text {
-			if item == "" {
-				continue
-			}
-			token, err := ParseToken(strings.TrimSpace(item))
-			if err != nil {
-				fmt.Printf("rpn: %v\n", err)
-				os.Exit(1)
-			}
+		eval(text)
+	}
+}
 
+func eval(commands []string) {
+	for i, item := range commands {
+		if item == "" {
+			continue
+		}
+		token, err := ParseToken(strings.TrimSpace(item))
+		if err != nil {
+			fmt.Printf("rpn: %v\n", err)
+			os.Exit(1)
+		}
+
+		if token.Type == MACRO || token.Type == MACRODEF || token.Type == REPEAT {
+			switch token.Type {
+			case REPEAT:
+				n := popNumber(token.Type)
+				if len(commands[i:]) < 2 {
+					throwNotEnoughArgumentsError(REPEAT)
+				}
+				command := commands[i+1]
+				var newCommands []string
+				for i := 0; i < int(n); i++ {
+					newCommands = append(newCommands, command)
+				}
+				if len(commands[i:]) > 2 {
+					newCommands = append(newCommands, commands[i+2:]...)
+				}
+				eval(newCommands)
+			case MACRODEF:
+				macros[commands[i]] = commands[i+1:]
+			case MACRO:
+				eval(macros[token.Literal.(string)])
+			}
+			break
+		} else {
 			handleCommand(token)
 		}
 	}
@@ -84,28 +112,33 @@ func handleCommand(token Token) {
 	case PLUS:
 		op1 := popNumber(PLUS)
 		op2 := popNumber(PLUS)
-		push(Token{Type: NUMBER, Literal: op1 + op2})
+		push(Token{Type: NUMBER, Literal: op2 + op1})
 	case MINUS:
 		op1 := popNumber(MINUS)
 		op2 := popNumber(MINUS)
-		push(Token{Type: NUMBER, Literal: op1 - op2})
+		push(Token{Type: NUMBER, Literal: op2 - op1})
 	case MULTIPLY:
 		op1 := popNumber(MULTIPLY)
 		op2 := popNumber(MULTIPLY)
-		push(Token{Type: NUMBER, Literal: op1 * op2})
+		push(Token{Type: NUMBER, Literal: op2 * op1})
 	case DIVIDE:
 		op1 := popNumber(DIVIDE)
 		op2 := popNumber(DIVIDE)
-		push(Token{Type: NUMBER, Literal: op1 / op2})
+		push(Token{Type: NUMBER, Literal: op2 / op1})
 	case CLRSTACK:
 		stack = make([]Token, 0)
+	case CLRVARS:
+		values = make(map[string]Token)
+	case CLRALL:
+		stack = make([]Token, 0)
+		values = make(map[string]Token)
 	case NOT:
 		op1 := popBoolean(NOT)
 		push(Token{Type: BOOLEAN, Literal: !op1})
 	case MOD:
 		op1 := popNumber(MOD)
 		op2 := popNumber(MOD)
-		push(Token{Type: NUMBER, Literal: math.Mod(op1, op2)})
+		push(Token{Type: NUMBER, Literal: math.Mod(op2, op1)})
 	case DECR:
 		op1 := popNumber(DECR)
 		push(Token{Type: NUMBER, Literal: op1 - 1})
@@ -116,65 +149,65 @@ func handleCommand(token Token) {
 	case BITAND:
 		op1 := popNumber(BITAND)
 		op2 := popNumber(BITAND)
-		push(Token{Type: NUMBER, Literal: float64(int64(op1) & int64(op2))})
+		push(Token{Type: NUMBER, Literal: float64(int64(op2) & int64(op1))})
 	case BITOR:
 		op1 := popNumber(BITOR)
 		op2 := popNumber(BITOR)
-		push(Token{Type: NUMBER, Literal: float64(int64(op1) | int64(op2))})
+		push(Token{Type: NUMBER, Literal: float64(int64(op2) | int64(op1))})
 	case BITXOR:
 		op1 := popNumber(BITXOR)
 		op2 := popNumber(BITXOR)
-		push(Token{Type: NUMBER, Literal: float64(int64(op1) ^ int64(op2))})
+		push(Token{Type: NUMBER, Literal: float64(int64(op2) ^ int64(op1))})
 	case BITNOT:
 		op1 := popNumber(BITNOT)
 		op2 := popNumber(BITNOT)
-		push(Token{Type: NUMBER, Literal: float64(int64(op1) &^ int64(op2))})
+		push(Token{Type: NUMBER, Literal: float64(int64(op2) &^ int64(op1))})
 	case BITLEFT:
 		op1 := popNumber(BITLEFT)
 		op2 := popNumber(BITLEFT)
-		push(Token{Type: NUMBER, Literal: float64(int64(op1) << int64(op2))})
+		push(Token{Type: NUMBER, Literal: float64(int64(op2) << int64(op1))})
 	case BITRIGHT:
 		op1 := popNumber(BITRIGHT)
 		op2 := popNumber(BITRIGHT)
-		push(Token{Type: NUMBER, Literal: float64(int64(op1) >> int64(op2))})
+		push(Token{Type: NUMBER, Literal: float64(int64(op2) >> int64(op1))})
 
 	case BOOLAND:
 		op1 := popBoolean(BOOLAND)
 		op2 := popBoolean(BOOLAND)
-		push(Token{Type: BOOLEAN, Literal: op1 && op2})
+		push(Token{Type: BOOLEAN, Literal: op2 && op1})
 	case BOOLOR:
 		op1 := popBoolean(BOOLAND)
 		op2 := popBoolean(BOOLAND)
-		push(Token{Type: BOOLEAN, Literal: op1 || op2})
+		push(Token{Type: BOOLEAN, Literal: op2 || op1})
 	case BOOLXOR:
 		op1 := popBoolean(BOOLAND)
 		op2 := popBoolean(BOOLAND)
-		push(Token{Type: BOOLEAN, Literal: op1 != op2})
+		push(Token{Type: BOOLEAN, Literal: op2 != op1})
 
 	case LT:
 		op1 := popNumber(LT)
 		op2 := popNumber(LT)
-		push(Token{Type: BOOLEAN, Literal: op1 < op2})
+		push(Token{Type: BOOLEAN, Literal: op2 < op1})
 	case LTOREQ:
 		op1 := popNumber(LT)
 		op2 := popNumber(LT)
-		push(Token{Type: BOOLEAN, Literal: op1 <= op2})
+		push(Token{Type: BOOLEAN, Literal: op2 <= op1})
 	case NOTEQ:
 		op1 := popNumber(LT)
 		op2 := popNumber(LT)
-		push(Token{Type: BOOLEAN, Literal: op1 != op2})
+		push(Token{Type: BOOLEAN, Literal: op2 != op1})
 	case EQ:
 		op1 := popNumber(LT)
 		op2 := popNumber(LT)
-		push(Token{Type: BOOLEAN, Literal: op1 == op2})
+		push(Token{Type: BOOLEAN, Literal: op2 == op1})
 	case GT:
 		op1 := popNumber(LT)
 		op2 := popNumber(LT)
-		push(Token{Type: BOOLEAN, Literal: op1 > op2})
+		push(Token{Type: BOOLEAN, Literal: op2 > op1})
 	case GTOREQ:
 		op1 := popNumber(LT)
 		op2 := popNumber(LT)
-		push(Token{Type: BOOLEAN, Literal: op1 >= op2})
+		push(Token{Type: BOOLEAN, Literal: op2 >= op1})
 
 	case ACOS:
 		op1 := popNumber(ACOS)
@@ -230,11 +263,11 @@ func handleCommand(token Token) {
 	case MAX:
 		op1 := popNumber(POW)
 		op2 := popNumber(POW)
-		push(Token{Type: NUMBER, Literal: math.Max(op1, op2)})
+		push(Token{Type: NUMBER, Literal: math.Max(op2, op1)})
 	case MIN:
 		op1 := popNumber(POW)
 		op2 := popNumber(POW)
-		push(Token{Type: NUMBER, Literal: math.Min(op1, op2)})
+		push(Token{Type: NUMBER, Literal: math.Min(op2, op1)})
 
 	case HEX:
 		mode = HEX
@@ -263,7 +296,7 @@ func handleCommand(token Token) {
 	case POW:
 		op1 := popNumber(POW)
 		op2 := popNumber(POW)
-		push(Token{Type: NUMBER, Literal: math.Pow(op1, op2)})
+		push(Token{Type: NUMBER, Literal: math.Pow(op2, op1)})
 
 	case HNL:
 	case HNS:
@@ -300,8 +333,29 @@ func handleCommand(token Token) {
 		push(op1)
 		push(op1)
 	case DUPN:
+		n := popNumber(DUPN)
+		if len(stack) < int(n) {
+			throwNotEnoughElementsError(DROPN)
+		}
+		temp := make([]Token, 0)
+		for i := 0; i < int(n); i++ {
+			item, _ := pop()
+			temp = append(temp, item)
+		}
+		for i := int(n) - 1; i >= 0; i-- {
+			push(temp[i])
+
+			push(temp[i])
+		}
 	case ROLL:
+		if len(stack) > 1 {
+			stackEnd := len(stack) - 1
+			stack = append(stack[stackEnd:], stack[:stackEnd]...)
+		}
 	case ROLLD:
+		if len(stack) > 1 {
+			stack = append(stack[1:], stack[0])
+		}
 	case STACK:
 		if display == "horizontal" {
 			display = "vertical"
@@ -318,6 +372,12 @@ func handleCommand(token Token) {
 		push(op2)
 	case MACRO:
 	case ASSIGN:
+		if len(stack) < 1 {
+			throwNotEnoughElementsError(ASSIGN)
+		}
+		variable, _ := pop()
+
+		values[token.Literal.(string)] = variable
 
 	case HELP:
 	case EXIT:
@@ -378,6 +438,11 @@ func remove(slice []Token, s int) []Token {
 
 func throwNotEnoughElementsError(action string) {
 	fmt.Printf("rpn: Not enough items on the stack to perform this command: %v\n", action)
+	os.Exit(1)
+}
+
+func throwNotEnoughArgumentsError(action string) {
+	fmt.Printf("rpn: Not enough arguments to perform this command: %v\n", action)
 	os.Exit(1)
 }
 

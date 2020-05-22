@@ -97,8 +97,9 @@ const (
 	STACK  = "toggle stack display from horizontal to vertical"
 	SWAP   = "swap top 2 stack items"
 
-	MACRO  = "macro"
-	ASSIGN = "assign"
+	MACRODEF = "a macro definition"
+	MACRO    = "macro"
+	ASSIGN   = "assign"
 
 	HELP = "help"
 	EXIT = "exit"
@@ -255,9 +256,19 @@ func ParseToken(item string) (Token, error) {
 		token = makeToken(OCT)
 	case "bin":
 		token = makeToken(BIN)
+	case "macro":
+		token = makeToken(MACRODEF)
+	case "x=":
+		token = Token{Type: ASSIGN, Literal: "x"}
 	case "exit":
 		token = makeToken(EXIT)
 	default:
+		if x, ok := values[item]; ok {
+			return x, nil
+		}
+		if _, ok := macros[item]; ok {
+			return Token{Type: MACRO, Literal: item}, nil
+		}
 		return Token{}, fmt.Errorf("Unknown command: %v", item)
 	}
 	return token, nil
