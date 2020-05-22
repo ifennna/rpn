@@ -13,18 +13,22 @@ var repl = false
 
 // Calculate -> run a calculation for a sequence of commands
 func Calculate(args []string) {
-	for _, item := range args {
-		token, err := ParseToken(item)
-		if err != nil {
-			fmt.Printf("rpn: %v\n", err)
-			os.Exit(1)
+	var input []string
+	// check if there's anything in stdin (from a pipe perhaps)
+	stat, _ := os.Stdin.Stat()
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		scanner := bufio.NewScanner(os.Stdin)
+		if scanned := scanner.Scan(); scanned {
+			input = strings.Split(scanner.Text(), " ")
 		}
-
-		handleCommand(token)
 	}
 
-	result := stack[0]
-	fmt.Println(result.Literal)
+	eval(append(args, input...))
+
+	if len(stack) > 0 {
+		result := stack[0]
+		fmt.Fprintln(os.Stdout, result.Literal)
+	}
 }
 
 // Repl -> create a read-eval-print loop
@@ -59,17 +63,17 @@ func printPrompt() {
 }
 
 func throwNotEnoughElementsError(action string) {
-	fmt.Printf("rpn: Not enough items on the stack to perform this command: %v\n", action)
+	fmt.Fprintf(os.Stderr, "rpn: Not enough items on the stack to perform this command: %v\n", action)
 	exit()
 }
 
 func throwNotEnoughArgumentsError(action string) {
-	fmt.Printf("rpn: Not enough arguments to perform this command: %v\n", action)
+	fmt.Fprintf(os.Stderr, "rpn: Not enough arguments to perform this command: %v\n", action)
 	exit()
 }
 
 func throwWrongElementType(expected, actual string) {
-	fmt.Printf("rpn: Expected a %v on the stack but found a %v\n", expected, actual)
+	fmt.Fprintf(os.Stderr, "rpn: Expected a %v on the stack but found a %v\n", expected, actual)
 	exit()
 }
 
