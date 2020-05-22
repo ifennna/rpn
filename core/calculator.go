@@ -20,8 +20,8 @@ func eval(commands []string) {
 		}
 		token, err := ParseToken(strings.TrimSpace(item))
 		if err != nil {
-			fmt.Printf("rpn: %v\n", err)
-			os.Exit(1)
+			fmt.Fprintf(os.Stderr, "rpn: %v\n", err)
+			exit()
 		}
 
 		if token.Type == MACRODEF || token.Type == REPEAT {

@@ -51,14 +51,31 @@ func printPrompt() {
 		valueStack = append(valueStack, item.Literal)
 	}
 	if display == "horizontal" {
-		fmt.Printf("%v > ", valueStack)
+		printValues()
+		for _, item := range valueStack {
+			fmt.Printf("%v ", item)
+		}
+		fmt.Print("> ")
 	} else {
 		fmt.Println("STACK TOP")
 		for i := len(valueStack) - 1; i >= 0; i-- {
 			fmt.Printf("%v\n", valueStack[i])
 		}
 		fmt.Println("STACK BOTTOM")
+		printValues()
 		fmt.Print("> ")
+	}
+}
+
+func printValues() {
+	if len(values) > 0 {
+		fmt.Print("[")
+	}
+	for i, v := range values {
+		fmt.Printf("%v= %v", i, v.Literal)
+	}
+	if len(values) > 0 {
+		fmt.Print("] ")
 	}
 }
 

@@ -269,7 +269,6 @@ func ParseToken(item string) (Token, error) {
 		if _, ok := macros[item]; ok {
 			return Token{Type: MACRO, Literal: item}, nil
 		}
-		fmt.Println(macros)
 		return Token{}, fmt.Errorf("Unknown command: %v", item)
 	}
 	return token, nil
