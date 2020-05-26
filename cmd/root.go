@@ -12,7 +12,7 @@ var interactive = false
 var root = &cobra.Command{
 	Use:   "rpn",
 	Short: "A reverse polish notation calculator",
-	Long:  "rpn is a cli tool that brings the power and flexibility of Reverse Polish Notation to your terminal.",
+	Long:  `rpn is a cli tool that brings the power and flexibility of Reverse Polish Notation to your terminal.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if interactive {
 			core.Repl()
