@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"math"
-	"strconv"
 )
 
 type Token struct {
@@ -80,11 +79,6 @@ const (
 	LOG  = "logarithm"
 	POW  = "raise a number to a power"
 
-	HNL = "host to network long"
-	HNS = "host to network short"
-	NHL = "network to host long"
-	NHS = "network to host short"
-
 	PICK   = "pick nth item from the stack"
 	REPEAT = "repeat an operation n times"
 	DEPTH  = "push current stack depth"
@@ -107,11 +101,6 @@ const (
 
 // ParseToken -> Parse a string into a calculator token
 func ParseToken(item string) (Token, error) {
-	number, err := strconv.ParseFloat(item, 64)
-	if err == nil {
-		return Token{Type: NUMBER, Literal: number}, nil
-	}
-
 	var token Token
 	switch item {
 	case "+":
@@ -218,14 +207,6 @@ func ParseToken(item string) (Token, error) {
 		token = makeToken(LOG)
 	case "pow":
 		token = makeToken(POW)
-	case "hnl":
-		token = makeToken(HNL)
-	case "hns":
-		token = makeToken(HNS)
-	case "nhl":
-		token = makeToken(NHL)
-	case "nhs":
-		token = makeToken(NHS)
 	case "pick":
 		token = makeToken(PICK)
 	case "repeat":
@@ -263,6 +244,10 @@ func ParseToken(item string) (Token, error) {
 	case "exit":
 		token = makeToken(EXIT)
 	default:
+		number, err := getInput(item)
+		if err == nil {
+			return Token{Type: NUMBER, Literal: number}, nil
+		}
 		if x, ok := values[item]; ok {
 			return x, nil
 		}

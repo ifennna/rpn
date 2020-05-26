@@ -249,18 +249,12 @@ func handleCommand(token Token) {
 		op2 := popNumber(POW)
 		push(Token{Type: NUMBER, Literal: math.Pow(op2, op1)})
 
-	case HNL:
-	case HNS:
-	case NHL:
-	case NHS:
-
 	case PICK:
 		op1 := popNumber(PICK)
 		if len(stack) <= int(op1) {
 			throwNotEnoughElementsError(PICK)
 		}
 		stack = remove(stack, int(op1))
-	case REPEAT:
 	case DEPTH:
 		push(Token{Type: NUMBER, Literal: len(stack) - 1})
 	case DROP:

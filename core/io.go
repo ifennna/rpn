@@ -97,6 +97,31 @@ func showResultValue(result interface{}) interface{} {
 	return result
 }
 
+func getInput(item string) (float64, error) {
+	switch mode {
+	case BIN:
+		result, err := strconv.ParseInt(item, 2, 64)
+		if err != nil {
+			return 0, err
+		}
+		return float64(result), err
+	case OCT:
+		result, err := strconv.ParseInt(item, 8, 64)
+		if err != nil {
+			return 0, err
+		}
+		return float64(result), err
+	case HEX:
+		result, err := strconv.ParseInt(item, 16, 64)
+		if err != nil {
+			return 0, err
+		}
+		return float64(result), err
+	default:
+		return strconv.ParseFloat(item, 64)
+	}
+}
+
 func throwNotEnoughElementsError(action string) {
 	fmt.Fprintf(os.Stderr, "rpn: Not enough items on the stack to perform this command: %v\n", action)
 	exit()
