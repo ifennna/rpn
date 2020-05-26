@@ -3,10 +3,13 @@ package core
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/mitchellh/go-homedir"
 )
 
 var mode = DEC
@@ -23,6 +26,10 @@ func Calculate(args []string) {
 		if scanned := scanner.Scan(); scanned {
 			input = strings.Split(scanner.Text(), " ")
 		}
+	}
+
+	if config, err := getConfig(); err == nil {
+		args = append(strings.Split(config, " "), args...)
 	}
 
 	eval(append(args, input...))
@@ -43,8 +50,17 @@ func Repl() {
 			return
 		}
 		text := strings.Split(scanner.Text(), " ")
+		if config, err := getConfig(); err == nil {
+			text = append(strings.Split(config, " "), text...)
+		}
 		eval(text)
 	}
+}
+
+func getConfig() (string, error) {
+	home, err := homedir.Dir()
+	data, err := ioutil.ReadFile(fmt.Sprintf("%v/.rpnrc", home))
+	return string(data), err
 }
 
 func printPrompt() {
