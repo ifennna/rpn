@@ -253,10 +253,11 @@ func handleCommand(token Token) {
 		op1 := popNumber(PICK)
 		if len(stack) <= int(op1) {
 			throwNotEnoughElementsError(PICK)
+		} else {
+			stack = remove(stack, int(op1))
 		}
-		stack = remove(stack, int(op1))
 	case DEPTH:
-		push(Token{Type: NUMBER, Literal: len(stack) - 1})
+		push(Token{Type: NUMBER, Literal: float64(len(stack))})
 	case DROP:
 		if len(stack) < 1 {
 			throwNotEnoughElementsError(DUP)
@@ -266,21 +267,24 @@ func handleCommand(token Token) {
 		n := popNumber(DROPN)
 		if len(stack) < int(n) {
 			throwNotEnoughElementsError(DROPN)
-		}
-		for i := 0; i <= int(n); i++ {
-			pop()
+		} else {
+			for i := 0; i <= int(n); i++ {
+				pop()
+			}
 		}
 	case DUP:
 		if len(stack) < 1 {
 			throwNotEnoughElementsError(DUP)
+		} else {
+			op1, _ := pop()
+			push(op1)
+			push(op1)
 		}
-		op1, _ := pop()
-		push(op1)
-		push(op1)
 	case DUPN:
 		n := popNumber(DUPN)
 		if len(stack) < int(n) {
 			throwNotEnoughElementsError(DROPN)
+			return
 		}
 		temp := make([]Token, 0)
 		for i := 0; i < int(n); i++ {
@@ -310,6 +314,7 @@ func handleCommand(token Token) {
 	case SWAP:
 		if len(stack) < 2 {
 			throwNotEnoughElementsError(SWAP)
+			return
 		}
 		op1, _ := pop()
 		op2, _ := pop()
@@ -320,12 +325,12 @@ func handleCommand(token Token) {
 	case ASSIGN:
 		if len(stack) < 1 {
 			throwNotEnoughElementsError(ASSIGN)
+			return
 		}
 		variable, _ := pop()
 
 		values[token.Literal.(string)] = variable
 
-	case HELP:
 	case EXIT:
 		fmt.Println("Goodbye")
 		os.Exit(0)

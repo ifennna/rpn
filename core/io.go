@@ -3,6 +3,7 @@ package core
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -138,9 +139,7 @@ func throwWrongElementType(expected, actual string) {
 }
 
 func exit() {
-	if !repl {
-		os.Exit(1)
-	}
+	os.Exit(1)
 }
 
 func getBinary(num float64) string {
@@ -186,6 +185,9 @@ func getHex(num float64) string {
 }
 
 func getFloatingPart(float float64, base int) string {
+	if float < 0 {
+		float = math.Abs(float)
+	}
 	floatPart := ""
 	for float != 0 {
 		float *= float64(base)
