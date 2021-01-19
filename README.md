@@ -4,7 +4,7 @@ RPN is a tool for running reverse Polish notation style calculations from the co
 
 ## Installing
 
-Binaries for Linux and MacOS can be found in the "releases" folder. To install, move the corresponding binary to a folder in your shell's $PATH. You can find out which folders are in the $PATH by running `echo $PATH`
+Download a binary from the [releases](https://github.com/noculture/rpn/releases) page. To install, move the binary to a folder in your shell's $PATH. You can find out which folders are in the $PATH by running `echo $PATH`
 
 ## Compiling
 
